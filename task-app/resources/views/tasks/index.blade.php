@@ -38,31 +38,72 @@
 
         <!-- Task List -->
         @foreach($tasks as $task)
-        <div class="flex items-center justify-between mb-2 p-2 border rounded">
+        <div class="mb-2 p-2 border rounded">
 
-            <form method="POST" action="/tasks/{{ $task->id }}">
-                @csrf
-                @method('PATCH')
-                <button class="mr-2">
-                    {{ $task->is_done ? '✔' : '❌' }}
-                </button>
-            </form>
+            {{-- Normal view --}}
+            <div class="flex items-center justify-between" id="view-{{ $task->id }}">
 
-            <span class="{{ $task->is_done ? 'line-through text-gray-400' : '' }}">
-                {{ $task->title }}
-            </span>
+                <form method="POST" action="/tasks/{{ $task->id }}/toggle">
+                    @csrf
+                    @method('PATCH')
+                    <button class="mr-2">
+                        {{ $task->is_done ? '✔' : '❌' }}
+                    </button>
+                </form>
 
-            <form method="POST" action="/tasks/{{ $task->id }}">
-                @csrf
-                @method('DELETE')
-                <button class="text-red-500 ml-4">
-                    Delete
-                </button>
-            </form>
+                <span class="flex-1 {{ $task->is_done ? 'line-through text-gray-400' : '' }}">
+                    {{ $task->title }}
+                </span>
+
+                <div class="flex gap-2 ml-4">
+                    <button
+                        onclick="showEdit({{ $task->id }}, '{{ addslashes($task->title) }}')"
+                        class="text-sm text-blue-500 hover:underline">
+                        Edit
+                    </button>
+
+                    <form method="POST" action="/tasks/{{ $task->id }}">
+                        @csrf
+                        @method('DELETE')
+                        <button class="text-sm text-red-500 hover:underline">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+            {{-- Edit view (hidden by default) --}}
+            <div class="hidden" id="edit-{{ $task->id }}">
+                <form method="POST" action="/tasks/{{ $task->id }}/rename" class="flex gap-2">
+                    @csrf
+                    @method('PATCH')
+                    <input type="text" name="title" id="input-{{ $task->id }}"
+                        class="border p-1 flex-1 rounded text-sm"
+                        value="{{ $task->title }}" required>
+                    <button class="bg-blue-500 text-white px-3 rounded text-sm">Save</button>
+                    <button type="button"
+                        onclick="hideEdit({{ $task->id }})"
+                        class="text-sm text-gray-400 hover:underline">Cancel</button>
+                </form>
+            </div>
 
         </div>
         @endforeach
     </div>
+
+<script>
+    function showEdit(id, title) {
+        document.getElementById('view-' + id).classList.add('hidden');
+        document.getElementById('edit-' + id).classList.remove('hidden');
+        document.getElementById('input-' + id).focus();
+    }
+
+    function hideEdit(id) {
+        document.getElementById('edit-' + id).classList.add('hidden');
+        document.getElementById('view-' + id).classList.remove('hidden');
+    }
+</script>
 
 </body>
 </html>

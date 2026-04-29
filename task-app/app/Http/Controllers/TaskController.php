@@ -36,4 +36,13 @@ class TaskController extends Controller
         Task::destroy($id);
         return redirect()->back();
     }
+
+    public function rename(Request $request, $id)
+{
+    $task = Task::findOrFail($id);
+    $task->title = $request->title;
+    $task->save();
+    return redirect()->back();
+}
+
 }
